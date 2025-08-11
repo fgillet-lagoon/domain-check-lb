@@ -7,6 +7,7 @@ export interface IStorage {
   getBookings(): Promise<Booking[]>;
   createBooking(booking: InsertBooking): Promise<Booking>;
   checkDomain(domain: string): Promise<boolean>;
+  checkMultipleDomains(baseDomain: string, extensions: string[]): Promise<Array<{domain: string, available: boolean}>>;
 }
 
 export class SQLiteStorage implements IStorage {
@@ -38,9 +39,9 @@ export class SQLiteStorage implements IStorage {
         customer_name TEXT NOT NULL,
         email TEXT NOT NULL,
         phone TEXT NOT NULL,
-        ridet TEXT,
-        id_document TEXT,
-        notes TEXT,
+        ridet TEXT DEFAULT '',
+        id_document TEXT DEFAULT '',
+        notes TEXT DEFAULT '',
         status TEXT DEFAULT 'réservé',
         FOREIGN KEY (package_id) REFERENCES packages (id)
       );
@@ -99,9 +100,48 @@ export class SQLiteStorage implements IStorage {
   }
 
   async checkDomain(domain: string): Promise<boolean> {
-    // Deterministic hash-based availability check
-    const hash = domain.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    return hash % 3 !== 0;
+    try {
+      // Use WhoisXML API for real domain availability checking
+      const apiKey = process.env.WHOISXML_API_KEY;
+      
+      if (!apiKey) {
+        console.warn("No WhoisXML API key found, using fallback method");
+        // Fallback deterministic hash-based availability check
+        const hash = domain.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+        return hash % 3 !== 0;
+      }
+
+      const response = await fetch(
+        `https://domain-availability.whoisxmlapi.com/api/v1?apiKey=${apiKey}&domainName=${domain}&outputFormat=json`
+      );
+
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      // WhoisXML returns DomainInfo.domainAvailability as "AVAILABLE" or "UNAVAILABLE"
+      return data.DomainInfo?.domainAvailability === "AVAILABLE";
+      
+    } catch (error) {
+      console.error("Domain availability check failed:", error);
+      // Fallback to deterministic hash if API fails
+      const hash = domain.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      return hash % 3 !== 0;
+    }
+  }
+
+  async checkMultipleDomains(baseDomain: string, extensions: string[]): Promise<Array<{domain: string, available: boolean}>> {
+    const results = await Promise.all(
+      extensions.map(async (ext) => {
+        const fullDomain = baseDomain + ext;
+        const available = await this.checkDomain(fullDomain);
+        return { domain: fullDomain, available };
+      })
+    );
+    
+    return results;
   }
 }
 

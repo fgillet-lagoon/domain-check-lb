@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, CheckCircle, XCircle } from "lucide-react";
+import { Search, CheckCircle, XCircle, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -11,12 +11,18 @@ interface DomainCheckerProps {
   onDomainAvailable: (domain: string) => void;
 }
 
+interface DomainCheckResult {
+  domain: string;
+  available: boolean;
+  alternatives?: Array<{domain: string, available: boolean}>;
+}
+
 export function DomainChecker({ onDomainAvailable }: DomainCheckerProps) {
   const [domainName, setDomainName] = useState("");
   const [extension, setExtension] = useState(".nc");
   const [checkedDomain, setCheckedDomain] = useState<string | null>(null);
 
-  const { data: domainCheck, isLoading, error } = useQuery({
+  const { data: domainCheck, isLoading, error } = useQuery<DomainCheckResult>({
     queryKey: ["/api/check", checkedDomain],
     enabled: !!checkedDomain,
     queryFn: () => api.checkDomain(checkedDomain!),
@@ -95,33 +101,63 @@ export function DomainChecker({ onDomainAvailable }: DomainCheckerProps) {
         )}
 
         {domainCheck && (
-          <div className={`p-4 rounded-lg border ${
-            domainCheck.available 
-              ? "bg-green-50 border-green-200" 
-              : "bg-red-50 border-red-200"
-          }`}>
-            <div className="flex items-center">
-              {domainCheck.available ? (
-                <CheckCircle className="text-green-600 mr-3" size={20} />
-              ) : (
-                <XCircle className="text-red-600 mr-3" size={20} />
-              )}
-              <div>
-                <h4 className={`font-semibold ${
-                  domainCheck.available ? "text-green-800" : "text-red-800"
-                }`}>
-                  {domainCheck.domain} {domainCheck.available ? "est disponible !" : "n'est pas disponible"}
-                </h4>
-                <p className={`text-sm ${
-                  domainCheck.available ? "text-green-700" : "text-red-700"
-                }`}>
-                  {domainCheck.available 
-                    ? "Vous pouvez réserver ce domaine."
-                    : "Ce domaine est déjà réservé."
-                  }
-                </p>
+          <div className="space-y-4">
+            {/* Primary domain result */}
+            <div className={`p-4 rounded-lg border ${
+              domainCheck.available 
+                ? "bg-green-50 border-green-200" 
+                : "bg-red-50 border-red-200"
+            }`}>
+              <div className="flex items-center">
+                {domainCheck.available ? (
+                  <CheckCircle className="text-green-600 mr-3" size={20} />
+                ) : (
+                  <XCircle className="text-red-600 mr-3" size={20} />
+                )}
+                <div>
+                  <h4 className={`font-semibold ${
+                    domainCheck.available ? "text-green-800" : "text-red-800"
+                  }`}>
+                    {domainCheck.domain} {domainCheck.available ? "est disponible !" : "n'est pas disponible"}
+                  </h4>
+                  <p className={`text-sm ${
+                    domainCheck.available ? "text-green-700" : "text-red-700"
+                  }`}>
+                    {domainCheck.available 
+                      ? "Vous pouvez réserver ce domaine."
+                      : "Ce domaine est déjà réservé."
+                    }
+                  </p>
+                </div>
               </div>
             </div>
+
+            {/* Alternative domains */}
+            {domainCheck.alternatives && domainCheck.alternatives.length > 0 && (
+              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <h4 className="font-semibold text-blue-800 mb-3 flex items-center">
+                  <ArrowRight className="text-blue-600 mr-2" size={16} />
+                  Alternatives disponibles
+                </h4>
+                <div className="space-y-2">
+                  {domainCheck.alternatives.map((alt, index) => (
+                    <div key={index} className="flex items-center justify-between p-3 bg-white rounded border border-blue-100">
+                      <div className="flex items-center">
+                        <CheckCircle className="text-green-600 mr-2" size={16} />
+                        <span className="font-medium text-[var(--gray-custom)]">{alt.domain}</span>
+                      </div>
+                      <Button
+                        size="sm"
+                        onClick={() => onDomainAvailable(alt.domain)}
+                        className="bg-primary hover:bg-primary/90 text-white"
+                      >
+                        Sélectionner
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 

@@ -19,9 +19,9 @@ export const bookings = sqliteTable("bookings", {
   customerName: text("customer_name").notNull(),
   email: text("email").notNull(),
   phone: text("phone").notNull(),
-  ridet: text("ridet"),
-  idDocument: text("id_document"),
-  notes: text("notes"),
+  ridet: text("ridet").default(""),
+  idDocument: text("id_document").default(""),
+  notes: text("notes").default(""),
   status: text("status").default("réservé"),
 });
 

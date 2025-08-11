@@ -44,7 +44,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // GET /api/check - Check domain availability
+  // GET /api/check - Check domain availability with alternatives
   app.get("/api/check", requireApiKey, async (req, res) => {
     try {
       const domain = req.query.domain as string;
@@ -61,8 +61,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Invalid domain extension. Allowed: .nc, .com, .net, .org" });
       }
 
+      // Check primary domain
       const isAvailable = await storage.checkDomain(domain);
-      res.json({ domain, available: isAvailable });
+      
+      // If not available, check alternatives
+      let alternatives: Array<{domain: string, available: boolean}> = [];
+      
+      if (!isAvailable) {
+        // Extract base domain name (without extension)
+        const baseDomain = domain.substring(0, domain.lastIndexOf('.'));
+        const otherExtensions = allowedExtensions.filter(ext => !domain.endsWith(ext));
+        
+        alternatives = await storage.checkMultipleDomains(baseDomain, otherExtensions);
+        // Only include available alternatives
+        alternatives = alternatives.filter(alt => alt.available);
+      }
+
+      res.json({ 
+        domain, 
+        available: isAvailable,
+        alternatives: alternatives.length > 0 ? alternatives : undefined
+      });
     } catch (error) {
       res.status(500).json({ error: "Failed to check domain availability" });
     }
