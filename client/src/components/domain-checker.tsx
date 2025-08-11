@@ -1,16 +1,11 @@
 import { useState } from "react";
-import { Search, CheckCircle, XCircle, ArrowRight, Package } from "lucide-react";
+import { Search, CheckCircle, XCircle, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import type { Package as PackageType } from "@shared/schema";
-
-interface DomainCheckerProps {
-  onDomainAvailable: (domain: string, selectedPackage: PackageType) => void;
-}
 
 interface DomainCheckResult {
   domain: string;
@@ -18,21 +13,15 @@ interface DomainCheckResult {
   alternatives?: Array<{domain: string, available: boolean}>;
 }
 
-export function DomainChecker({ onDomainAvailable }: DomainCheckerProps) {
+export function DomainChecker() {
   const [domainName, setDomainName] = useState("");
   const [extension, setExtension] = useState(".nc");
   const [checkedDomain, setCheckedDomain] = useState<string | null>(null);
-  const [selectedPackage, setSelectedPackage] = useState<PackageType | null>(null);
 
   const { data: domainCheck, isLoading, error } = useQuery<DomainCheckResult>({
     queryKey: ["/api/check", checkedDomain],
     enabled: !!checkedDomain,
     queryFn: () => api.checkDomain(checkedDomain!),
-  });
-
-  const { data: packages = [] } = useQuery({
-    queryKey: ["/api/packages"],
-    queryFn: api.getPackages,
   });
 
   const handleCheck = () => {
@@ -153,19 +142,7 @@ export function DomainChecker({ onDomainAvailable }: DomainCheckerProps) {
                         <CheckCircle className="text-green-600 mr-2" size={16} />
                         <span className="font-medium text-[var(--gray-custom)]">{alt.domain}</span>
                       </div>
-                      <Button
-                        size="sm"
-                        onClick={() => {
-                          const extension = alt.domain.substring(alt.domain.lastIndexOf('.'));
-                          const matchingPackage = packages.find((pkg: PackageType) => pkg.extension === extension);
-                          if (matchingPackage) {
-                            onDomainAvailable(alt.domain, matchingPackage);
-                          }
-                        }}
-                        className="bg-primary hover:bg-primary/90 text-white"
-                      >
-                        Sélectionner
-                      </Button>
+                      <span className="text-sm font-medium text-green-600">Disponible</span>
                     </div>
                   ))}
                 </div>
@@ -174,52 +151,7 @@ export function DomainChecker({ onDomainAvailable }: DomainCheckerProps) {
           </div>
         )}
 
-        {domainCheck?.available && (
-          <div className="space-y-4">
-            {/* Package Selection */}
-            <div className="p-4 bg-slate-50 rounded-lg">
-              <h4 className="font-semibold text-[var(--gray-custom)] mb-3 flex items-center">
-                <Package className="text-primary mr-2" size={16} />
-                Choisissez votre forfait
-              </h4>
-              <div className="grid gap-3">
-                {packages.map((pkg: PackageType) => (
-                  <div
-                    key={pkg.id}
-                    onClick={() => setSelectedPackage(pkg)}
-                    className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                      selectedPackage?.id === pkg.id
-                        ? "border-primary bg-primary bg-opacity-5"
-                        : "border-slate-200 hover:border-primary"
-                    }`}
-                  >
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <h5 className="font-medium text-[var(--gray-custom)]">{pkg.name}</h5>
-                        <p className="text-sm text-[var(--gray-light)]">{pkg.description}</p>
-                      </div>
-                      <div className="text-right">
-                        <span className="font-bold text-primary">
-                          {pkg.price.toLocaleString()} XPF
-                        </span>
-                        <p className="text-xs text-[var(--gray-light)]">/an</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
 
-            {selectedPackage && (
-              <Button
-                onClick={() => onDomainAvailable(domainCheck.domain, selectedPackage)}
-                className="w-full bg-primary hover:bg-primary/90"
-              >
-                Réserver {domainCheck.domain} avec {selectedPackage.name}
-              </Button>
-            )}
-          </div>
-        )}
       </CardContent>
     </Card>
   );
