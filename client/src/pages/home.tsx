@@ -1,26 +1,24 @@
 import { useState } from "react";
 import { DomainChecker } from "@/components/domain-checker";
-import { PackageSelector } from "@/components/package-selector";
 import { BookingForm } from "@/components/booking-form";
 import type { Package } from "@shared/schema";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/lib/api";
 
 export default function Home() {
-  const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
   const [availableDomain, setAvailableDomain] = useState<string | null>(null);
   const [showBookingForm, setShowBookingForm] = useState(false);
+  const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
 
-  const handleDomainAvailable = (domain: string) => {
+  const { data: packages = [] } = useQuery({
+    queryKey: ["/api/packages"],
+    queryFn: api.getPackages,
+  });
+
+  const handleDomainAvailable = (domain: string, selectedPackage: Package) => {
     setAvailableDomain(domain);
-    if (selectedPackage) {
-      setShowBookingForm(true);
-    }
-  };
-
-  const handlePackageSelect = (pkg: Package) => {
-    setSelectedPackage(pkg);
-    if (availableDomain) {
-      setShowBookingForm(true);
-    }
+    setSelectedPackage(selectedPackage);
+    setShowBookingForm(true);
   };
 
   const handleCancelBooking = () => {
@@ -42,27 +40,16 @@ export default function Home() {
         </p>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-8">
-        {/* Domain Check and Booking Section */}
-        <div className="lg:col-span-2 space-y-8">
-          <DomainChecker onDomainAvailable={handleDomainAvailable} />
-          
-          {showBookingForm && availableDomain && selectedPackage && (
-            <BookingForm
-              domain={availableDomain}
-              selectedPackage={selectedPackage}
-              onCancel={handleCancelBooking}
-            />
-          )}
-        </div>
-
-        {/* Packages Section */}
-        <div>
-          <PackageSelector
+      <div className="max-w-4xl mx-auto">
+        <DomainChecker onDomainAvailable={handleDomainAvailable} />
+        
+        {showBookingForm && availableDomain && selectedPackage && (
+          <BookingForm
+            domain={availableDomain}
             selectedPackage={selectedPackage}
-            onPackageSelect={handlePackageSelect}
+            onCancel={handleCancelBooking}
           />
-        </div>
+        )}
       </div>
     </div>
   );

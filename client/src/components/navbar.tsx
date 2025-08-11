@@ -30,18 +30,6 @@ export function Navbar() {
                 Accueil
               </button>
             </Link>
-            <Link href="/reservations">
-              <button
-                className={`px-4 py-2 text-sm font-medium rounded-lg flex items-center gap-2 transition-colors ${
-                  location === "/reservations"
-                    ? "bg-primary text-white"
-                    : "text-[var(--gray-light)] hover:text-[var(--gray-custom)] hover:bg-slate-100"
-                }`}
-              >
-                <List size={16} />
-                Réservations
-              </button>
-            </Link>
           </div>
         </div>
       </div>
