@@ -1,0 +1,43 @@
+Build a full-stack app with Nuxt 3 (frontend) and PHP (backend) to check and book domain names (.nc, .com, .net, .org).
+Design & Branding:
+* Use the provided logo (file included in repo root: logo.png) as the main brand element.
+* Use logo primary color as the main theme color for the app.
+* Secondary colors: white and multiple tints of grey (light grey backgrounds, darker grey for text).
+* Layout and style should look like a professional “Réservation de nom de domaine” app (domain booking platform).
+* All text, labels, and UI must be in French.
+Backend (PHP):
+* Located in /api/.
+* CORS enabled for all origins: pgsql CopierModifier   header("Access-Control-Allow-Origin: *");
+* header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+* header("Access-Control-Allow-Headers: Content-Type, Authorization");
+* if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(204); exit; }
+*    Place at the top of every endpoint file.
+* Endpoints:
+    1. GET /api/packages.php → returns all packages with prices (exactly as in the provided rate list).
+    2. GET /api/check.php?domain=exemple.com → checks if domain is available (mocked deterministic hash). Allowed extensions: .nc, .com, .net, .org.
+    3. POST /api/book.php → books a domain (stores in DB). Fields: domain, packageId, customerName, email, phone, ridet, idDocument, notes.
+    4. GET /api/bookings.php → returns list of all bookings from DB.
+* Authentication: All endpoints require API key via header Authorization: ApiKey YOUR_KEY_HERE.
+* Database:
+    * Use SQLite (bookings.db) for portability in Replit.
+    * Create table bookings with fields: id, created_at, domain, package_id, customer_name, email, phone, ridet, id_document, notes, status.
+    * status defaults to "réservé".
+* API_KEY must be stored in environment variables.
+Frontend (Nuxt 3):
+* Pages:
+    1. Accueil (/) → domain availability check form + package selection + booking form (in French).
+    2. Réservations (/bookings) → lists all bookings from API (table view).
+* All API calls include Authorization: ApiKey YOUR_KEY_HERE header.
+* Use Nuxt public runtime config for API base URL and API key.
+* Styling:
+    * Responsive design.
+    * Use logo color as primary color for buttons, highlights, and headings.
+    * White and light grey backgrounds, medium grey for text.
+    * Professional booking app look (clear form sections, subtle borders, padding).
+* All labels, buttons, and messages in French (e.g., “Nom de domaine”, “Vérifier la disponibilité”, “Réserver”, “Liste des réservations”).
+* Show booking confirmation message with booking ID after reservation.
+Other requirements:
+* Run Nuxt dev server on port 3000.
+* Run PHP server (built-in php -S) on another port (e.g., 8080).
+* Enable CORS so Nuxt can call PHP in dev mode.
+* All code and config ready-to-run in Replit without extra setup besides installing Nuxt dependencies and enabling SQLite extension in PHP.
