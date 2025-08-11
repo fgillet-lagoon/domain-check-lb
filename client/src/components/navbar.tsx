@@ -13,7 +13,7 @@ export function Navbar() {
             <div className="flex items-center space-x-3">
               <img src={logoPath} alt="Lagoon Business" className="h-8" />
               <div>
-                <p className="text-xs text-[var(--gray-light)]">Réservation de domaines</p>
+                <p className="text-xs text-[var(--gray-light)]">Vérification nom de domaine</p>
               </div>
             </div>
           </div>
