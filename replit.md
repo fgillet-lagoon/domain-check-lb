@@ -2,6 +2,12 @@
 
 This is a full-stack domain booking application built with React (frontend) and Express.js (backend). The app allows users to check domain availability for .nc, .com, .net, and .org extensions and book domains with package selection. It features a modern interface using shadcn/ui components, Tailwind CSS styling, and implements a complete booking workflow with customer information collection.
 
+## Recent Updates (January 2025)
+- ✓ Integrated real domain availability checking via WhoisXML API 
+- ✓ Added alternative extension suggestions when domains are unavailable
+- ✓ Updated logo to use new Lagoon Business branding
+- ✓ Professional French interface with complete booking workflow
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.

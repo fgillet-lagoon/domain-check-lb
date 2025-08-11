@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { Globe, Home, List } from "lucide-react";
-import logoPath from "@assets/logo.svg";
+import logoPath from "@assets/lagoon-business-logo_1754953144244.png";
 
 export function Navbar() {
   const [location] = useLocation();
@@ -11,11 +11,8 @@ export function Navbar() {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-                <img src={logoPath} alt="Lagoon Business" className="w-8 h-8" />
-              </div>
+              <img src={logoPath} alt="Lagoon Business" className="h-8" />
               <div>
-                <h1 className="text-xl font-bold text-[var(--gray-custom)]">Lagoon Business</h1>
                 <p className="text-xs text-[var(--gray-light)]">Réservation de domaines</p>
               </div>
             </div>
