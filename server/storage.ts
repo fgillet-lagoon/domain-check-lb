@@ -102,8 +102,8 @@ export class SQLiteStorage implements IStorage {
 
   async checkDomain(domain: string): Promise<boolean> {
     try {
-      // Special test case: make nc.nc unavailable to test domain info feature
-      if (domain === "nc.nc") {
+      // Special test cases: make these domains unavailable to test domain info feature
+      if (domain === "nc.nc" || domain === "lagoon.nc") {
         return false;
       }
 
@@ -171,8 +171,8 @@ export class SQLiteStorage implements IStorage {
         }
       );
 
-      if (response.status === 404) {
-        // Domain not found in registry, return null (this is expected for many domains)
+      if (response.status === 404 || response.status === 400) {
+        // Domain not found in registry, return null (expected for domains not in registry)
         return null;
       }
 
