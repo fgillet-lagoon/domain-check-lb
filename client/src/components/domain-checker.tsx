@@ -137,49 +137,58 @@ export function DomainChecker() {
                   Informations sur le domaine {domainCheck.domain}
                 </h4>
                 <div className="space-y-3 text-sm">
-                  {domainCheck.domainInfo.titulaire && (
+                  {domainCheck.domainInfo.beneficiaire && (
                     <div className="flex items-start">
                       <User className="text-blue-600 mr-2 mt-0.5" size={14} />
                       <div>
-                        <span className="font-medium text-blue-800">Titulaire:</span>
-                        <p className="text-blue-700">{domainCheck.domainInfo.titulaire}</p>
+                        <span className="font-medium text-blue-800">Bénéficiaire:</span>
+                        <p className="text-blue-700">{domainCheck.domainInfo.beneficiaire}</p>
                       </div>
                     </div>
                   )}
-                  {domainCheck.domainInfo.contact_administratif && (
+                  {domainCheck.domainInfo.gestionnaire && domainCheck.domainInfo.gestionnaire !== "AUCUN" && (
                     <div className="flex items-start">
                       <Building className="text-blue-600 mr-2 mt-0.5" size={14} />
                       <div>
-                        <span className="font-medium text-blue-800">Contact administratif:</span>
-                        <p className="text-blue-700">{domainCheck.domainInfo.contact_administratif}</p>
+                        <span className="font-medium text-blue-800">Gestionnaire:</span>
+                        <p className="text-blue-700">{domainCheck.domainInfo.gestionnaire}</p>
                       </div>
                     </div>
                   )}
-                  {domainCheck.domainInfo.date_creation && (
+                  {domainCheck.domainInfo.dateCreation && (
                     <div className="flex items-center">
                       <Calendar className="text-blue-600 mr-2" size={14} />
                       <span className="font-medium text-blue-800">Date de création:</span>
                       <span className="text-blue-700 ml-2">
-                        {new Date(domainCheck.domainInfo.date_creation).toLocaleDateString('fr-FR')}
+                        {new Date(domainCheck.domainInfo.dateCreation).toLocaleDateString('fr-FR')}
                       </span>
                     </div>
                   )}
-                  {domainCheck.domainInfo.date_expiration && (
+                  {domainCheck.domainInfo.dateExpiration && (
                     <div className="flex items-center">
                       <Calendar className="text-blue-600 mr-2" size={14} />
                       <span className="font-medium text-blue-800">Date d'expiration:</span>
                       <span className="text-blue-700 ml-2">
-                        {new Date(domainCheck.domainInfo.date_expiration).toLocaleDateString('fr-FR')}
+                        {new Date(domainCheck.domainInfo.dateExpiration).toLocaleDateString('fr-FR')}
                       </span>
                     </div>
                   )}
-                  {domainCheck.domainInfo.serveurs_dns && domainCheck.domainInfo.serveurs_dns.length > 0 && (
+                  {domainCheck.domainInfo.nbDaysBeforeExpires && (
+                    <div className="flex items-center">
+                      <Calendar className="text-blue-600 mr-2" size={14} />
+                      <span className="font-medium text-blue-800">Jours avant expiration:</span>
+                      <span className="text-blue-700 ml-2">
+                        {domainCheck.domainInfo.nbDaysBeforeExpires} jours
+                      </span>
+                    </div>
+                  )}
+                  {domainCheck.domainInfo.dns && domainCheck.domainInfo.dns.length > 0 && (
                     <div className="flex items-start">
                       <Info className="text-blue-600 mr-2 mt-0.5" size={14} />
                       <div>
                         <span className="font-medium text-blue-800">Serveurs DNS:</span>
                         <ul className="text-blue-700 ml-2 list-disc list-inside">
-                          {domainCheck.domainInfo.serveurs_dns.map((dns: string, index: number) => (
+                          {domainCheck.domainInfo.dns.map((dns: string, index: number) => (
                             <li key={index}>{dns}</li>
                           ))}
                         </ul>
