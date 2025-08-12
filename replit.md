@@ -7,6 +7,9 @@ This is a full-stack domain booking application built with React (frontend) and 
 - ✓ Added alternative extension suggestions when domains are unavailable
 - ✓ Updated logo to use new Lagoon Business branding
 - ✓ Professional French interface with complete booking workflow
+- ✓ Simplified interface to focus purely on domain availability checking
+- ✓ Integrated Domaine NC API for detailed .nc domain information display
+- ✓ Shows comprehensive domain details for unavailable .nc domains (owner, DNS, dates)
 
 # User Preferences
 
@@ -37,11 +40,12 @@ Preferred communication style: Simple, everyday language.
 - **Relationships**: Foreign key from bookings.package_id to packages.id
 
 ## API Endpoints
-- `GET /api/packages`: Returns all available domain packages
-- `GET /api/check?domain=`: Checks domain availability using deterministic hash
-- `POST /api/book`: Creates new domain booking with customer information
-- `GET /api/bookings`: Lists all bookings from database
+- `GET /api/check?domain=`: Checks domain availability using WhoisXML API with Domaine NC integration
+  - Returns domain availability status
+  - For unavailable .nc domains: includes detailed domain information from Domaine NC API
+  - Provides alternative domain suggestions for unavailable domains
 - **Authentication**: All endpoints require `Authorization: ApiKey YOUR_KEY_HERE` header
+- **External APIs**: WhoisXML API for availability, Domaine NC API for .nc domain details
 
 ## Data Validation
 - **Schema Validation**: Zod schemas for type safety and runtime validation
