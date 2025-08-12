@@ -162,7 +162,7 @@ export class SQLiteStorage implements IStorage {
       
       console.log(`Attempting to fetch domain info for: ${domainName}`);
       const response = await fetch(
-        `https://domaine-nc.p.rapidapi.com/domaines/offratel/${domainName}`,
+        `https://domaine-nc.p.rapidapi.com/domaines/${domainName.toLowerCase()}/NC`,
         {
           headers: {
             'x-rapidapi-host': 'domaine-nc.p.rapidapi.com',
