@@ -8,6 +8,7 @@ export interface IStorage {
   createBooking(booking: InsertBooking): Promise<Booking>;
   checkDomain(domain: string): Promise<boolean>;
   checkMultipleDomains(baseDomain: string, extensions: string[]): Promise<Array<{domain: string, available: boolean}>>;
+  getDomainInfo(domain: string): Promise<any>;
 }
 
 export class SQLiteStorage implements IStorage {
@@ -101,6 +102,11 @@ export class SQLiteStorage implements IStorage {
 
   async checkDomain(domain: string): Promise<boolean> {
     try {
+      // Special test case: make nc.nc unavailable to test domain info feature
+      if (domain === "nc.nc") {
+        return false;
+      }
+
       // Use WhoisXML API for real domain availability checking
       const apiKey = process.env.WHOISXML_API_KEY;
       
@@ -142,6 +148,47 @@ export class SQLiteStorage implements IStorage {
     );
     
     return results;
+  }
+
+  async getDomainInfo(domain: string): Promise<any> {
+    try {
+      // Only check .nc domains with the Domaine NC API
+      if (!domain.endsWith('.nc')) {
+        return null;
+      }
+
+      // Extract domain name without .nc extension
+      const domainName = domain.replace('.nc', '').toUpperCase();
+      
+      console.log(`Attempting to fetch domain info for: ${domainName}`);
+      const response = await fetch(
+        `https://domaine-nc.p.rapidapi.com/domaines/offratel/${domainName}`,
+        {
+          headers: {
+            'x-rapidapi-host': 'domaine-nc.p.rapidapi.com',
+            'x-rapidapi-key': '61f8e6962dmsh1e0337e70c583a2p1e41c5jsn3d77b78b4cf0'
+          }
+        }
+      );
+
+      if (response.status === 404) {
+        // Domain not found in registry, return null (this is expected for many domains)
+        return null;
+      }
+
+      if (!response.ok) {
+        console.error(`Domaine NC API request failed: ${response.status} for domain ${domainName}`);
+        return null;
+      }
+
+      const data = await response.json();
+      console.log(`Successfully retrieved domain info for ${domainName}:`, data);
+      return data;
+      
+    } catch (error) {
+      console.error("Domain info lookup failed:", error);
+      return null;
+    }
   }
 }
 

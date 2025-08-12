@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, CheckCircle, XCircle, ArrowRight } from "lucide-react";
+import { Search, CheckCircle, XCircle, ArrowRight, Info, Calendar, User, Building } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -11,6 +11,7 @@ interface DomainCheckResult {
   domain: string;
   available: boolean;
   alternatives?: Array<{domain: string, available: boolean}>;
+  domainInfo?: any;
 }
 
 export function DomainChecker() {
@@ -127,6 +128,67 @@ export function DomainChecker() {
                 </div>
               </div>
             </div>
+
+            {/* Domain information for .nc domains that are not available */}
+            {!domainCheck.available && domainCheck.domain.endsWith('.nc') && domainCheck.domainInfo && (
+              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <h4 className="font-semibold text-blue-800 mb-3 flex items-center">
+                  <Info className="text-blue-600 mr-2" size={16} />
+                  Informations sur le domaine {domainCheck.domain}
+                </h4>
+                <div className="space-y-3 text-sm">
+                  {domainCheck.domainInfo.titulaire && (
+                    <div className="flex items-start">
+                      <User className="text-blue-600 mr-2 mt-0.5" size={14} />
+                      <div>
+                        <span className="font-medium text-blue-800">Titulaire:</span>
+                        <p className="text-blue-700">{domainCheck.domainInfo.titulaire}</p>
+                      </div>
+                    </div>
+                  )}
+                  {domainCheck.domainInfo.contact_administratif && (
+                    <div className="flex items-start">
+                      <Building className="text-blue-600 mr-2 mt-0.5" size={14} />
+                      <div>
+                        <span className="font-medium text-blue-800">Contact administratif:</span>
+                        <p className="text-blue-700">{domainCheck.domainInfo.contact_administratif}</p>
+                      </div>
+                    </div>
+                  )}
+                  {domainCheck.domainInfo.date_creation && (
+                    <div className="flex items-center">
+                      <Calendar className="text-blue-600 mr-2" size={14} />
+                      <span className="font-medium text-blue-800">Date de création:</span>
+                      <span className="text-blue-700 ml-2">
+                        {new Date(domainCheck.domainInfo.date_creation).toLocaleDateString('fr-FR')}
+                      </span>
+                    </div>
+                  )}
+                  {domainCheck.domainInfo.date_expiration && (
+                    <div className="flex items-center">
+                      <Calendar className="text-blue-600 mr-2" size={14} />
+                      <span className="font-medium text-blue-800">Date d'expiration:</span>
+                      <span className="text-blue-700 ml-2">
+                        {new Date(domainCheck.domainInfo.date_expiration).toLocaleDateString('fr-FR')}
+                      </span>
+                    </div>
+                  )}
+                  {domainCheck.domainInfo.serveurs_dns && domainCheck.domainInfo.serveurs_dns.length > 0 && (
+                    <div className="flex items-start">
+                      <Info className="text-blue-600 mr-2 mt-0.5" size={14} />
+                      <div>
+                        <span className="font-medium text-blue-800">Serveurs DNS:</span>
+                        <ul className="text-blue-700 ml-2 list-disc list-inside">
+                          {domainCheck.domainInfo.serveurs_dns.map((dns: string, index: number) => (
+                            <li key={index}>{dns}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Alternative domains */}
             {domainCheck.alternatives && domainCheck.alternatives.length > 0 && (

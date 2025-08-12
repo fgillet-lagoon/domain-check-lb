@@ -64,8 +64,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check primary domain
       const isAvailable = await storage.checkDomain(domain);
       
-      // If not available, check alternatives
+      // If not available, check alternatives and get domain info for .nc domains
       let alternatives: Array<{domain: string, available: boolean}> = [];
+      let domainInfo = null;
       
       if (!isAvailable) {
         // Extract base domain name (without extension)
@@ -75,12 +76,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         alternatives = await storage.checkMultipleDomains(baseDomain, otherExtensions);
         // Only include available alternatives
         alternatives = alternatives.filter(alt => alt.available);
+
+        // Get detailed info for .nc domains that are not available
+        if (domain.endsWith('.nc')) {
+          domainInfo = await storage.getDomainInfo(domain);
+        }
       }
 
       res.json({ 
         domain, 
         available: isAvailable,
-        alternatives: alternatives.length > 0 ? alternatives : undefined
+        alternatives: alternatives.length > 0 ? alternatives : undefined,
+        domainInfo: domainInfo
       });
     } catch (error) {
       res.status(500).json({ error: "Failed to check domain availability" });
