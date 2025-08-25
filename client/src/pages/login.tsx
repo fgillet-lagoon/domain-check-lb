@@ -41,9 +41,6 @@ export default function Login() {
           <CardTitle className="text-2xl font-bold text-gray-900">
             Connexion
           </CardTitle>
-          <CardDescription>
-            Accédez à l'interface d'administration
-          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
