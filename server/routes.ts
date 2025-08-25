@@ -4,7 +4,15 @@ import { storage } from "./storage";
 import { insertBookingSchema } from "@shared/schema";
 import { z } from "zod";
 
-// API Key middleware
+// Authentication middleware
+function requireAuth(req: any, res: any, next: any) {
+  if (!req.session.authenticated) {
+    return res.status(401).json({ error: "Authentication required" });
+  }
+  next();
+}
+
+// API Key middleware (keep for backwards compatibility)
 function requireApiKey(req: any, res: any, next: any) {
   const apiKey = req.headers.authorization?.replace("ApiKey ", "");
   const expectedKey = process.env.API_KEY || "default_api_key";
@@ -34,8 +42,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Apply CORS to all routes
   app.use(enableCORS);
 
+  // Authentication routes
+  app.post("/api/login", async (req, res) => {
+    const { username, password } = req.body;
+    
+    if (username === "lagoon" && password === "L4goonBusiness") {
+      req.session.authenticated = true;
+      req.session.user = { username: "lagoon" };
+      res.json({ success: true, user: { username: "lagoon" } });
+    } else {
+      res.status(401).json({ error: "Invalid credentials" });
+    }
+  });
+
+  app.post("/api/logout", (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        return res.status(500).json({ error: "Could not log out" });
+      }
+      res.json({ success: true });
+    });
+  });
+
+  app.get("/api/auth/user", (req, res) => {
+    if (req.session.authenticated) {
+      res.json(req.session.user);
+    } else {
+      res.status(401).json({ error: "Not authenticated" });
+    }
+  });
+
   // GET /api/packages - Get all packages
-  app.get("/api/packages", requireApiKey, async (req, res) => {
+  app.get("/api/packages", requireAuth, async (req, res) => {
     try {
       const packages = await storage.getPackages();
       res.json(packages);
@@ -45,7 +83,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // GET /api/check - Check domain availability with alternatives
-  app.get("/api/check", requireApiKey, async (req, res) => {
+  app.get("/api/check", requireAuth, async (req, res) => {
     try {
       const domain = req.query.domain as string;
       
@@ -95,7 +133,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // POST /api/book - Book a domain
-  app.post("/api/book", requireApiKey, async (req, res) => {
+  app.post("/api/book", requireAuth, async (req, res) => {
     try {
       const bookingData = insertBookingSchema.parse(req.body);
       const booking = await storage.createBooking(bookingData);
@@ -109,7 +147,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // GET /api/bookings - Get all bookings
-  app.get("/api/bookings", requireApiKey, async (req, res) => {
+  app.get("/api/bookings", requireAuth, async (req, res) => {
     try {
       const bookings = await storage.getBookings();
       res.json(bookings);

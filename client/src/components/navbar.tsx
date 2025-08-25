@@ -1,9 +1,30 @@
 import { Link, useLocation } from "wouter";
-import { Globe, Home, List } from "lucide-react";
+import { Globe, Home, List, LogOut } from "lucide-react";
 import logoPath from "@assets/lagoon-business-logo_1754953144244.png";
+import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 export function Navbar() {
   const [location] = useLocation();
+  const { user, logout, isLoggingOut } = useAuth();
+  const { toast } = useToast();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast({
+        title: "Déconnexion réussie",
+        description: "À bientôt !",
+      });
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Erreur lors de la déconnexion",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <nav className="bg-white shadow-sm border-b border-slate-200">
@@ -30,6 +51,23 @@ export function Navbar() {
                 Accueil
               </button>
             </Link>
+{user && (
+              <div className="flex items-center space-x-4">
+                <span className="text-sm text-gray-600">
+                  Bonjour, <span className="font-medium">{user.username}</span>
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleLogout}
+                  disabled={isLoggingOut}
+                  data-testid="button-logout"
+                >
+                  <LogOut className="mr-1 h-4 w-4" />
+                  {isLoggingOut ? "..." : "Déconnexion"}
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </div>
